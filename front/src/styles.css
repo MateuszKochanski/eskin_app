@@ -1,18 +1,18 @@
 body {
+  font-family: Arial, sans-serif;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-    "Droid Sans", "Helvetica Neue", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  background-color: #f4f4f4;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
-}
-
-.app {
-  margin: 20px;
-}
+/* .app {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+} */
 
 .sensor {
   width: 30px;
@@ -28,6 +28,77 @@ code {
   /* opacity: 0.1; */
 }
 
+.eskinPreview {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.servoParameters {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.measurement {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.measurement-container {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.measurement-button {
+  flex: 1;
+  padding: 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.measurement-button:hover {
+  background-color: #45a049;
+}
+
+progress {
+  width: 100%;
+  border: 0;
+  height: 36px;
+  border-radius: 5px;
+}
+progress::-webkit-progress-bar {
+  border: 1px solid #ccc;
+  height: 36px;
+  border-radius: 5px;
+  background-color: #fff;
+}
+progress::-webkit-progress-value {
+  border: 0;
+  height: 36px;
+  border-radius: 5px;
+  background-color: #0a0;
+}
+progress::-moz-progress-bar {
+  border: 0;
+  height: 36px;
+  border-radius: 5px;
+}
+
 .break {
   width: 30px;
   height: 30px;
@@ -38,17 +109,81 @@ code {
   font-size: 10px;
 }
 
+.matrix {
+  display: table;
+  margin: auto;
+}
+
 .row {
   display: table;
 }
 
 .setup {
-  padding: 10px;
+  margin-bottom: 10px;
   display: flex;
+  align-items: center;
 }
 
 .setupText {
-  padding: 4px;
-  padding-left: 10px;
-  text-align: right;
+  font-weight: bold;
+}
+
+.sync-status {
+  margin: 2px;
+  display: flex-start;
+}
+
+.sync-status-icon {
+  height: 15px;
+}
+
+.sync-status-info {
+  margin-left: 5px;
+}
+/* ############################## */
+
+h1 {
+  margin-top: 0px;
+  text-align: center;
+  /* font-size: larger; */
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.parameterLabel {
+  font-weight: bold;
+  flex: 1;
+}
+
+input {
+  flex: 2;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.parametersButton {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.parametersButton:hover {
+  background-color: #45a049;
 }
