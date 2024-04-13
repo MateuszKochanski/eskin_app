@@ -10,7 +10,7 @@ export function Measurement() {
           Abort
         </button>
       </div>
-      <progress className="measurement-progress" value={0.5} />
+      <progress className="measurement-progress" value={0.1} />
     </div>
   );
 }
