@@ -30,6 +30,8 @@ export class StmClient {
         const msgId = MsgIdCreator.create();
         const reqData = numberToBytes(msgId, 2).concat(data);
 
+        // console.log(numberToBytes(msgId, 2));
+
         this._callbacks.set(msgId, callback);
 
         this._client.write(Buffer.from(reqData));
@@ -38,11 +40,16 @@ export class StmClient {
     private _handleResponse = (data: Buffer) => {
         const dataArray = Array.from(data);
         const msgId = bytesToNumber(dataArray.slice(0, 2));
+        // console.log(dataArray);
 
         const callback = this._callbacks.get(msgId);
 
         const respData = dataArray.slice(2);
-        callback?.(respData);
+
+        if (callback) {
+            this._callbacks.delete(msgId);
+            callback(respData);
+        }
     };
 
     private _handleError(err: Error) {
