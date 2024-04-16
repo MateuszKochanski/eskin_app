@@ -40,7 +40,7 @@ export class StmClient {
     private _handleResponse = (data: Buffer) => {
         const dataArray = Array.from(data);
         const msgId = bytesToNumber(dataArray.slice(0, 2));
-        // console.log(dataArray);
+        console.log(dataArray);
 
         const callback = this._callbacks.get(msgId);
 
