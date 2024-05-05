@@ -6,6 +6,7 @@ import { bytesToNumber } from "../func/bytesToNumber";
 import { calcCKSM } from "../func/calcCKSM";
 import { numberToBytes } from "../func/numberToBytes";
 import { Tool } from "../enums/Tool";
+import { validateServoResponse } from "../func/validateServoResponse";
 
 export class ServoCommunicator {
     private static _instance: ServoCommunicator;
@@ -31,7 +32,7 @@ export class ServoCommunicator {
         // console.log(array);
 
         this._client.write(array, () => {
-            console.log("writed");
+            // console.log("writed");
         });
     }
 
@@ -41,12 +42,17 @@ export class ServoCommunicator {
         array.push(calcCKSM(array));
         array = this._preq.concat(array);
         this._client.write(array, (data) => {
-            callback(this._extractValue(address, data));
+            const resp = data.slice(1);
+            if (!validateServoResponse(resp)) {
+                console.log("validation ERRor");
+                return;
+            }
+            callback(this._extractValue(address, resp));
         });
     }
 
     private _extractValue(address: Address, data: number[]): number {
-        const startIndex = 6;
+        const startIndex = 5;
         const value = bytesToNumber(data.slice(startIndex, startIndex + Size.get(address)));
         return value;
     }

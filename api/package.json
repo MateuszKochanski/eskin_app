@@ -19,9 +19,11 @@
         "net": "^1.0.2",
         "typescript": "^5.4.3",
         "websocket": "^1.0.34",
-        "ws": "^8.16.0"
+        "ws": "^8.16.0",
+        "zod": "^3.23.6"
     },
     "devDependencies": {
+        "@types/ws": "^8.5.10",
         "nodemon": "^3.1.0",
         "ts-node": "^10.9.2"
     }
