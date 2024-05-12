@@ -45,6 +45,7 @@ export class ServoCommunicator {
             const resp = data.slice(1);
             if (!validateServoResponse(resp)) {
                 console.log("validation ERRor");
+                callback(-1);
                 return;
             }
             callback(this._extractValue(address, resp));
