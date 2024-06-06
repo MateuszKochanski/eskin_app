@@ -38,17 +38,8 @@ export class StmClient {
         return this._instance;
     }
 
-    async waitForConnection(): Promise<void> {
-        return new Promise((resolve) => {
-            if (this._connected) resolve();
-            setInterval(() => {
-                if (this._connected) resolve();
-            }, 10);
-        });
-    }
-
     async write(data: number[], callback: (data: number[]) => void) {
-        await this.waitForConnection();
+        await this._waitForConnection();
         const msgId = MsgIdCreator.create();
         const reqData = numberToBytes(msgId, 2).concat(data);
 
@@ -81,6 +72,15 @@ export class StmClient {
             console.log(`Aborting due to Timeout! ${request.id}`);
             this._callback([]);
         }, this._timeout);
+    }
+
+    private async _waitForConnection(): Promise<void> {
+        return new Promise((resolve) => {
+            if (this._connected) resolve();
+            setInterval(() => {
+                if (this._connected) resolve();
+            }, 10);
+        });
     }
 
     private _handleResponse = (data: Buffer) => {

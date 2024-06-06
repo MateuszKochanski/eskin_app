@@ -26,7 +26,7 @@ export function Row({ y, values, detection }) {
 }
 
 function calcId(x, y) {
-    return 16 * y + x;
+    return 16 * x + y;
 }
 
 function sensorExist(x, y, detection) {

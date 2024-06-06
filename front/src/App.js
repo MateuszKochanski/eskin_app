@@ -2,7 +2,7 @@ import useWebSocket from "react-use-websocket";
 import { useState } from "react";
 
 import { EskinPreview } from "./eskinPrev/EskinPreview";
-import { ServoParameters } from "./gripperSettings/ServoParameters";
+import { ServoPositionsPrev } from "./servoPositionsPrev/ServoPositionsPrev";
 import { Measurement } from "./measurement/Measurement";
 
 export default function App() {
@@ -37,8 +37,8 @@ export default function App() {
     return (
         <div className="app">
             <EskinPreview values={values} />
-            <ServoParameters paremeters={servosParameters} />
-            {/* <Measurement /> */}
+            <ServoPositionsPrev paremeters={servosParameters} />
+            <Measurement />
         </div>
     );
 }

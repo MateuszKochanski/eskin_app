@@ -1,16 +1,35 @@
+import { useState } from "react";
+
 export function Measurement() {
-  return (
-    <div className="measurement">
-      <h1>Measurement</h1>
-      <div className="measurement-container">
-        <button className="measurement-button" style={{ marginRight: "10px" }}>
-          Start
-        </button>
-        <button className="measurement-button" style={{ marginLeft: "10px" }}>
-          Abort
-        </button>
-      </div>
-      <progress className="measurement-progress" value={0.1} />
-    </div>
-  );
+    const [filename, setFilename] = useState("data.json");
+    const handleInputChange = (event) => {
+        setFilename(event.target.value);
+    };
+
+    const start = () => {
+        fetch("http://localhost:3002/start", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                filename: filename,
+            }),
+        })
+            .then((resp) => {
+                console.log(resp);
+            })
+            .catch((err) => console.log(err));
+    };
+
+    return (
+        <div className="measurement">
+            <h1>Measurement</h1>
+            <input className="filename" type="text" value={filename} onChange={handleInputChange} />
+            <button className="parametersButton" onClick={start}>
+                Start
+            </button>
+        </div>
+    );
 }

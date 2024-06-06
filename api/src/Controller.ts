@@ -46,7 +46,7 @@ export class Controller {
         await this._openPosition();
     }
 
-    async _openPosition() {
+    private async _openPosition() {
         return this._setPositions(
             parseInt(process.env.SERVO_1_OPEN_POSITION),
             parseInt(process.env.SERVO_2_OPEN_POSITION),
@@ -55,7 +55,7 @@ export class Controller {
         );
     }
 
-    async _closePosition() {
+    private async _closePosition() {
         return this._setPositions(
             parseInt(process.env.SERVO_1_CLOSE_POSITION),
             parseInt(process.env.SERVO_2_CLOSE_POSITION),
@@ -64,7 +64,7 @@ export class Controller {
         );
     }
 
-    async _setPositions(servo1Pos: number, servo2Pos: number, servo1Speed: number, servo2Speed: number) {
+    private async _setPositions(servo1Pos: number, servo2Pos: number, servo1Speed: number, servo2Speed: number) {
         this._servoCommunicator.setValue(this._servoId1, Address.MovingSpeed, servo1Speed);
         this._servoCommunicator.setValue(this._servoId2, Address.MovingSpeed, servo2Speed);
         this._servoCommunicator.setValue(this._servoId1, Address.GoalPosition, servo1Pos);
@@ -79,7 +79,7 @@ export class Controller {
         });
     }
 
-    async _wait(ms: number) {
+    private async _wait(ms: number) {
         return new Promise((resolve) => {
             setTimeout(() => {
                 resolve(undefined);
@@ -90,9 +90,9 @@ export class Controller {
     private _startReading(data: StartReq) {
         this._dataRecorder.init(data!.filename);
         this._recordData = true;
-        setTimeout(() => {
-            this._stopReading();
-        }, 5000);
+        // setTimeout(() => {
+        //     this._stopReading();
+        // }, 5000);
     }
 
     private _stopReading() {
