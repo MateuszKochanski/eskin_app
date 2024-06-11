@@ -1,17 +1,16 @@
 import { configDotenv } from "dotenv";
 import { Controller } from "./Controller";
-import { setupServos } from "./func/setupServos";
+import { setupServos } from "./utils/setupServos";
 import { HttpServer } from "./HttpServer";
+import { Address } from "./enums/Address";
+import { ServoCommunicator } from "./communicators/ServoCommunicator";
 
 configDotenv();
 
-setupServos();
+// setupServos();
+// new HttpServer();
+ServoCommunicator.getInstance().getValue(11, Address.PresentPosition, () => {});
 
-// Controller.getInstance().startReading();
-
-// setTimeout(() => {
-//     Controller.getInstance().stopReading();
-//     console.log("done");
-// }, 10000);
-
-new HttpServer();
+setInterval(() => {
+    ServoCommunicator.getInstance().getValue(11, Address.PresentPosition, () => {});
+}, 10000);

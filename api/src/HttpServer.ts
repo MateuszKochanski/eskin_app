@@ -18,7 +18,6 @@ export class HttpServer {
             console.log(`HTTP server listening on port ${this._port}`);
         });
 
-        this._app.post("/", () => {});
         this._app.post("/start", (req, res) => {
             const data = req.body;
             console.log(data);

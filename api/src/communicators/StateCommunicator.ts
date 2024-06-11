@@ -1,17 +1,15 @@
 import { DataFrame } from "../schemas/DataFrameSchema";
-import { Tool } from "../enums/Tool";
-import { StmClient } from "../StmClient";
 import { Address } from "../enums/Address";
-import { bytesToNumber } from "../func/bytesToNumber";
+import { bytesToNumber } from "../utils/bytesToNumber";
 import { Size } from "../Size";
-import { calcCKSM } from "../func/calcCKSM";
+import { calcCKSM } from "../utils/calcCKSM";
 import { Instruction } from "../enums/Instruction";
-import { validateServoResponse } from "../func/validateServoResponse";
+import { validateServoResponse } from "../utils/validateServoResponse";
+import { StmClient } from "../StmClient";
 
 export class StateCommunicator {
     private static _instance: StateCommunicator;
     private _client: StmClient;
-    private _preq: number[] = [Tool.State];
 
     private constructor() {
         this._client = StmClient.getInstance();
@@ -22,7 +20,7 @@ export class StateCommunicator {
         return this._instance;
     }
 
-    getData(servoId1: number, servoId2: number, callback: (data: DataFrame) => void) {
+    start(servoId1: number, servoId2: number, callback: (data: DataFrame) => void) {
         const length = 4;
         let servoReq1 = [
             servoId1,
@@ -44,11 +42,15 @@ export class StateCommunicator {
         servoReq2.push(calcCKSM(servoReq2));
         servoReq2 = [255, 255].concat(servoReq2);
 
-        let array = this._preq.concat(servoReq1, servoReq2);
+        // let array = this._preq.concat(servoReq1, servoReq2);
 
-        this._client.write(array, (data) => {
+        this._client.startContinuous(servoReq1, servoReq2, (data) => {
             callback(this._extractData(data));
         });
+    }
+
+    stop() {
+        this._client.stopContinuous();
     }
 
     private _extractData(data: number[]): DataFrame {

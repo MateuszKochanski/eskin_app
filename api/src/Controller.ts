@@ -4,15 +4,15 @@ import { EskinCommunicator } from "./communicators/ESkinCommunicator";
 import { ServoCommunicator } from "./communicators/ServoCommunicator";
 import { StateCommunicator } from "./communicators/StateCommunicator";
 import { Address } from "./enums/Address";
-import { isCloseTo } from "./func/isCloseTo";
+import { isCloseTo } from "./utils/isCloseTo";
 import { DataFrame } from "./schemas/DataFrameSchema";
 import { StartReq } from "./schemas/StartReqSchema";
 
 export class Controller {
     private static _instance: Controller;
-    private _interval: NodeJS.Timeout | undefined;
-    private _delay = 100;
-    private _eskinCommunicator: EskinCommunicator;
+    // private _interval: NodeJS.Timeout | undefined;
+    // private _delay = 100;
+    // private _eskinCommunicator: EskinCommunicator;
     private _servoCommunicator: ServoCommunicator;
     private _stateCommunicator: StateCommunicator;
     private _servoId1 = parseInt(process.env.SERVO_1_ID, 10);
@@ -24,7 +24,7 @@ export class Controller {
     private _servo2CurrentPosition: number = -1;
 
     private constructor() {
-        this._eskinCommunicator = EskinCommunicator.getInstance();
+        // this._eskinCommunicator = EskinCommunicator.getInstance();
         this._servoCommunicator = ServoCommunicator.getInstance();
         this._stateCommunicator = StateCommunicator.getInstance();
         this._dataRecorder = new DataRecorder(process.env.RECORD_DATA_FILENAME);
@@ -101,14 +101,9 @@ export class Controller {
     }
 
     private _read() {
-        this._interval = setInterval(() => {
-            let start = Date.now();
-            this._stateCommunicator.getData(this._servoId1, this._servoId2, (data) => {
-                const newTime = Date.now();
-                start = newTime;
-                this._emit(data);
-            });
-        }, this._delay);
+        this._stateCommunicator.start(this._servoId1, this._servoId2, (data) => {
+            this._emit(data);
+        });
     }
 
     private _emit(data: DataFrame) {

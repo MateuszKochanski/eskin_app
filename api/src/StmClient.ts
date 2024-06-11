@@ -1,34 +1,23 @@
-import net, { Socket } from "net";
+import dgram, { Socket } from "dgram";
 import { MsgIdCreator } from "./MsgIdCreator";
-import { numberToBytes } from "./func/numberToBytes";
-import { bytesToNumber } from "./func/bytesToNumber";
-import { StmRequest } from "StmRequest";
+import { numberToBytes } from "./utils/numberToBytes";
+import { bytesToNumber } from "./utils/bytesToNumber";
+import { MessageType } from "./enums/MessageType";
+import { ContinuousCommand } from "./enums/ContinuousCommand";
 
 export class StmClient {
     private static _instance: StmClient;
     private _client: Socket;
-    private _callbacks: Map<number, (data: number[]) => void>;
-    private _connected: boolean;
-    private _timeout: number = 1000;
+    private _instantCallbacks: Map<number, (data: number[]) => void>;
+    private _continuousCallback?: (data: number[]) => void;
 
-    private _inExecution: boolean = false;
-
-    private _callback: (data: number[]) => void | undefined;
-    private _currentId: number | undefined;
-    private _requests: StmRequest[];
+    private _ip = process.env.STM_SERVER_IP;
+    private _port = parseInt(process.env.STM_SERVER_PORT);
 
     private constructor() {
-        this._client = new Socket();
-        this._callbacks = new Map();
-        this._connected = false;
-        this._requests = [];
+        this._client = dgram.createSocket("udp4");
 
-        this._client.connect(parseInt(process.env.STM_SERVER_PORT), process.env.STM_SERVER_IP, () => {
-            this._connected = true;
-            console.log("Connected!");
-        });
-
-        this._client.on("data", this._handleResponse);
+        this._client.on("message", this._handleResponse);
         this._client.on("error", this._handleError);
         this._client.on("close", this._handleClose);
     }
@@ -38,69 +27,70 @@ export class StmClient {
         return this._instance;
     }
 
-    async write(data: number[], callback: (data: number[]) => void) {
-        await this._waitForConnection();
+    startContinuous(req1: number[], req2: number[], callback: (data: number[]) => void) {
+        const request = [MessageType.Continuous, ContinuousCommand.Start, req1.length, ...req1, req2.length, ...req2];
+        this._continuousCallback = callback;
+        this._client.send(Buffer.from(request), this._port, this._ip, (err) => {
+            if (err) throw err;
+            console.log("sent start continous");
+        });
+    }
+
+    stopContinuous() {
+        const request = [MessageType.Continuous, ContinuousCommand.Stop];
+        this._continuousCallback = undefined;
+        this._client.send(Buffer.from(request), this._port, this._ip, (err) => {
+            if (err) throw err;
+            console.log("sent start continous");
+        });
+    }
+
+    write(data: number[], callback: (data: number[]) => void) {
         const msgId = MsgIdCreator.create();
-        const reqData = numberToBytes(msgId, 2).concat(data);
-
-        const request = { id: msgId, data: reqData, callback };
-        this._requests.push(request);
-        if (!this._inExecution) {
-            this._inExecution = true;
-            this._writeNext();
-        }
-    }
-
-    private _writeNext() {
-        const request = this._requests.shift();
-        if (!request) {
-            this._inExecution = false;
-            return;
-        }
-
-        this._currentId = request.id;
-        this._callback = (data) => {
-            clearTimeout(timeout);
-            this._callback = undefined;
-            request.callback(data);
-            this._writeNext();
-        };
-
-        this._client.write(Buffer.from(request.data));
-
-        const timeout = setTimeout(() => {
-            console.log(`Aborting due to Timeout! ${request.id}`);
-            this._callback([]);
-        }, this._timeout);
-    }
-
-    private async _waitForConnection(): Promise<void> {
-        return new Promise((resolve) => {
-            if (this._connected) resolve();
-            setInterval(() => {
-                if (this._connected) resolve();
-            }, 10);
+        this._instantCallbacks.set(msgId, callback);
+        const request = [1, ...numberToBytes(msgId, 2), ...data];
+        this._client.send(Buffer.from(request), this._port, this._ip, (err) => {
+            if (err) {
+                console.log("asdad");
+                throw err;
+            }
+            console.log("udp message sent");
         });
     }
 
     private _handleResponse = (data: Buffer) => {
         const dataArray = Array.from(data);
-        const msgId = bytesToNumber(dataArray.slice(0, 2));
-
-        if (!this._currentId) return;
-        if (this._currentId !== msgId) return;
-
-        const respData = dataArray.slice(2);
-
-        this._callback(respData);
+        const type = dataArray.shift();
+        switch (type) {
+            case MessageType.Instant:
+                this._handleInstantMsg(dataArray);
+                break;
+            case MessageType.Continuous:
+                this._handleContinuousMsg(dataArray);
+                break;
+            default:
+                console.log("Unknown message type");
+        }
     };
+
+    private _handleInstantMsg(data: number[]) {
+        const idBytes = data.splice(0, 2);
+        const msgId = bytesToNumber(idBytes);
+        const callback = this._instantCallbacks.get(msgId);
+        if (!callback) return;
+        callback(data);
+        this._instantCallbacks.delete(msgId);
+    }
+
+    private _handleContinuousMsg(data: number[]) {
+        this._continuousCallback?.(data);
+    }
 
     private _handleError(err: Error) {
         console.log(err);
     }
 
     private _handleClose() {
-        this._connected = false;
         console.log("Connection closed!");
     }
 }

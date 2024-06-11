@@ -2,16 +2,15 @@ import { Address } from "../enums/Address";
 import { Instruction } from "../enums/Instruction";
 import { Size } from "../Size";
 import { StmClient } from "../StmClient";
-import { bytesToNumber } from "../func/bytesToNumber";
-import { calcCKSM } from "../func/calcCKSM";
-import { numberToBytes } from "../func/numberToBytes";
-import { Tool } from "../enums/Tool";
-import { validateServoResponse } from "../func/validateServoResponse";
+import { bytesToNumber } from "../utils/bytesToNumber";
+import { calcCKSM } from "../utils/calcCKSM";
+import { numberToBytes } from "../utils/numberToBytes";
+import { validateServoResponse } from "../utils/validateServoResponse";
 
 export class ServoCommunicator {
     private static _instance: ServoCommunicator;
     private _client: StmClient;
-    private _preq: number[] = [Tool.Servo, 0xff, 0xff];
+    private _preq: number[] = [0xff, 0xff];
 
     private constructor() {
         this._client = StmClient.getInstance();
@@ -29,7 +28,6 @@ export class ServoCommunicator {
         array = array.concat(numberToBytes(value, Size.get(address)));
         array.push(calcCKSM(array));
         array = this._preq.concat(array);
-        // console.log(array);
 
         this._client.write(array, () => {
             // console.log("writed");
