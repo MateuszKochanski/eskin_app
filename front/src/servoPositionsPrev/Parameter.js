@@ -3,7 +3,7 @@ export function Parameter({ parameter }) {
     return (
         <li key={parameter.name}>
             <label className="parameterLabel">{parameter.name}</label>
-            <input type="number" value={parameter.value} />
+            <label className="parameterValue">{parameter.value}</label>
         </li>
     );
 }

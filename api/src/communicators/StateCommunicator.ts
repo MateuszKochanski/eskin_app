@@ -56,7 +56,7 @@ export class StateCommunicator {
     private _extractData(data: number[]): DataFrame {
         let servoPos1 = -1;
         let servoPos2 = -1;
-        const startIndex = 1;
+        const startIndex = 0;
         const servoData1 = data.slice(startIndex, startIndex + 10);
         if (validateServoResponse(servoData1)) servoPos1 = this._extractValue(Address.PresentPosition, servoData1);
         const servoData2 = data.slice(startIndex + 10, startIndex + 20);

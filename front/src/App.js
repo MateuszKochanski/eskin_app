@@ -17,8 +17,8 @@ export default function App() {
     // ]);
 
     const [servosParameters, setServosParameters] = useState([
-        { name: "Servo1 position", value: 0 },
-        { name: "Servo2 position", value: 0 },
+        { name: "Servo 1 position:", value: 0 },
+        { name: "Servo 2 position:", value: 0 },
     ]);
 
     useWebSocket(socketUrl, {
@@ -27,8 +27,8 @@ export default function App() {
             const data = JSON.parse(msg.data);
             setValues(data.eskin);
             setServosParameters([
-                { name: "Servo1 position", value: data.servoPos1 },
-                { name: "Servo2 position", value: data.servoPos2 },
+                { name: "Servo 1 position:", value: data.servoPos1 },
+                { name: "Servo 2 position:", value: data.servoPos2 },
             ]);
         },
         shouldReconnect: (closeEvent) => true,

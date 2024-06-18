@@ -39,8 +39,7 @@ export class ServoCommunicator {
         let array = [id, length, Instruction.Read, address, Size.get(address)];
         array.push(calcCKSM(array));
         array = this._preq.concat(array);
-        this._client.write(array, (data) => {
-            const resp = data.slice(1);
+        this._client.write(array, (resp) => {
             if (!validateServoResponse(resp)) {
                 console.log("validation ERRor");
                 callback(-1);

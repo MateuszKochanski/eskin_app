@@ -9,12 +9,15 @@ export class StmClient {
     private static _instance: StmClient;
     private _client: Socket;
     private _instantCallbacks: Map<number, (data: number[]) => void>;
+    private _continuousSet: boolean = false;
     private _continuousCallback?: (data: number[]) => void;
+    private _lastMsgTime?: number;
 
     private _ip = process.env.STM_SERVER_IP;
     private _port = parseInt(process.env.STM_SERVER_PORT);
 
     private constructor() {
+        this._instantCallbacks = new Map();
         this._client = dgram.createSocket("udp4");
 
         this._client.on("message", this._handleResponse);
@@ -34,6 +37,7 @@ export class StmClient {
             if (err) throw err;
             console.log("sent start continous");
         });
+        this._continuousSet = true;
     }
 
     stopContinuous() {
@@ -41,8 +45,9 @@ export class StmClient {
         this._continuousCallback = undefined;
         this._client.send(Buffer.from(request), this._port, this._ip, (err) => {
             if (err) throw err;
-            console.log("sent start continous");
+            console.log("sent stop continous");
         });
+        this._continuousSet = false;
     }
 
     write(data: number[], callback: (data: number[]) => void) {
@@ -60,6 +65,13 @@ export class StmClient {
 
     private _handleResponse = (data: Buffer) => {
         const dataArray = Array.from(data);
+        const now = Date.now();
+        if (this._lastMsgTime) {
+            console.log(now - this._lastMsgTime);
+        }
+        this._lastMsgTime = now;
+        // console.log(dataArray);
+        // console.log(this._instantCallbacks.size);
         const type = dataArray.shift();
         switch (type) {
             case MessageType.Instant:
@@ -83,6 +95,7 @@ export class StmClient {
     }
 
     private _handleContinuousMsg(data: number[]) {
+        if (!this._continuousSet) this.stopContinuous();
         this._continuousCallback?.(data);
     }
 
