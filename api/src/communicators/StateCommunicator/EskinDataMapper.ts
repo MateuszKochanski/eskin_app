@@ -67,9 +67,9 @@ export class EskinDataMaper {
     }
 
     handleData(data: number[]) {
-        let nFrame = data.at(2);
-        let nPocket = data.at(4);
-        const payload = data.slice(6);
+        let nFrame = data.at(0);
+        let nPocket = data.at(2);
+        const payload = data.slice(4);
 
         nPocket++;
         if (nPocket >= this._packetsCount) {

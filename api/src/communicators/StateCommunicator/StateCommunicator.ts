@@ -8,6 +8,7 @@ import { validateServoResponse } from "../../utils/validateServoResponse";
 import { StmClient } from "../../StmClient";
 import { EskinDataMaper } from "./EskinDataMapper";
 import { PositionsStore } from "./PositionsStore";
+import { Device } from "../../enums/Device";
 
 export class StateCommunicator {
     private static _instance: StateCommunicator;
@@ -15,6 +16,7 @@ export class StateCommunicator {
     private _eskinDataMaper: EskinDataMaper;
     private _positionStore: PositionsStore;
     private _frameReady: boolean;
+    private _lastMsgTime?: number;
 
     private constructor() {
         this._frameReady = false;
@@ -51,7 +53,22 @@ export class StateCommunicator {
         servoReq2 = [255, 255].concat(servoReq2);
 
         this._client.startContinuous(servoReq1, servoReq2, (data) => {
-            this._eskinDataMaper.handleData(data);
+            const device = data.shift();
+            switch (device) {
+                case Device.Servo:
+                    const now = Date.now();
+                    if (this._lastMsgTime) {
+                        console.log(now - this._lastMsgTime);
+                    }
+                    this._lastMsgTime = now;
+                    this._positionStore.handleData(data);
+                    break;
+                case Device.Eskin:
+                    this._eskinDataMaper.handleData(data);
+                    break;
+                default:
+                    break;
+            }
             if (this._eskinDataMaper.dataReady()) {
                 const eskinData = this._eskinDataMaper.data;
                 const positions = this._positionStore.data;

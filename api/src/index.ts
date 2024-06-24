@@ -15,7 +15,9 @@ new HttpServer();
 // ServoCommunicator.getInstance().getValue(11, Address.PresentPosition, () => {});
 
 // setInterval(() => {
-//     ServoCommunicator.getInstance().getValue(11, Address.PresentPosition, () => {});
+//     ServoCommunicator.getInstance().getValue(11, Address.PresentPosition, (data) => {
+//         console.log(data);
+//     });
 // }, 1000);
 
 // setInterval(() => {
@@ -27,6 +29,17 @@ new HttpServer();
 //     // console.log(data);
 // });
 
+// let lastMsgTime: number;
+
+// StateCommunicator.getInstance().start(9, 11, (data) => {
+//     // const now = Date.now();
+//     // if (lastMsgTime) {
+//     //     console.log(now - lastMsgTime);
+//     // }
+//     // lastMsgTime = now;
+//     // console.log(data);
+// });
+
 // setTimeout(() => {
 //     StateCommunicator.getInstance().stop();
-// }, 500000);
+// }, 5000);

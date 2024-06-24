@@ -31,8 +31,7 @@ export class StmClient {
     }
 
     startContinuous(req1: number[], req2: number[], callback: (data: number[]) => void) {
-        // const request = [MessageType.Continuous, ContinuousCommand.Start, req1.length, ...req1, req2.length, ...req2];
-        const request = [1, 0, 4, 0];
+        const request = [MessageType.Continuous, ContinuousCommand.Start, req1.length, ...req1, req2.length, ...req2];
         this._continuousCallback = callback;
         this._client.send(Buffer.from(request), this._port, this._ip, (err) => {
             if (err) throw err;
@@ -42,8 +41,7 @@ export class StmClient {
     }
 
     stopContinuous() {
-        // const request = [MessageType.Continuous, ContinuousCommand.Stop];
-        const request = [1, 0, 2, 0];
+        const request = [MessageType.Continuous, ContinuousCommand.Stop];
         this._continuousCallback = undefined;
         this._client.send(Buffer.from(request), this._port, this._ip, (err) => {
             if (err) throw err;
@@ -55,7 +53,7 @@ export class StmClient {
     write(data: number[], callback: (data: number[]) => void) {
         const msgId = MsgIdCreator.create();
         this._instantCallbacks.set(msgId, callback);
-        const request = [...numberToBytes(msgId, 2), ...data];
+        const request = [MessageType.Instant, ...numberToBytes(msgId, 2), ...data];
         this._client.send(Buffer.from(request), this._port, this._ip, (err) => {
             if (err) {
                 throw err;
@@ -66,15 +64,7 @@ export class StmClient {
 
     private _handleResponse = (data: Buffer) => {
         const dataArray = Array.from(data);
-        console.log("data");
-        this._handleContinuousMsg(dataArray);
-        // this._eskinDataMaper.handleData(dataArray);
 
-        // const now = Date.now();
-        // if (this._lastMsgTime) {
-        //     console.log(now - this._lastMsgTime);
-        // }
-        // this._lastMsgTime = now;
         // console.log(dataArray);
         // console.log(this._instantCallbacks.size);
         const type = dataArray.shift();
