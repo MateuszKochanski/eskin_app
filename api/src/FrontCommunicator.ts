@@ -1,5 +1,5 @@
+import { DataFrame } from "DataFrame";
 import { WebSocketServer } from "ws";
-import { DataFrame } from "./schemas/DataFrameSchema";
 
 const wss = new WebSocketServer({
     port: 3001,

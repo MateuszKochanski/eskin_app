@@ -1,28 +1,23 @@
-import { DataFrame } from "../../schemas/DataFrameSchema";
 import { Address } from "../../enums/Address";
-import { bytesToNumber } from "../../utils/bytesToNumber";
 import { Size } from "../../Size";
 import { calcCKSM } from "../../utils/calcCKSM";
 import { Instruction } from "../../enums/Instruction";
-import { validateServoResponse } from "../../utils/validateServoResponse";
 import { StmClient } from "../../StmClient";
-import { EskinDataMaper } from "./EskinDataMapper";
-import { PositionsStore } from "./PositionsStore";
+import { EskinDataHandler } from "./EskinDataHandler";
+import { ServosDataHandler } from "./ServosDataHandler";
 import { Device } from "../../enums/Device";
+import { DataFrame } from "DataFrame";
 
 export class StateCommunicator {
     private static _instance: StateCommunicator;
     private _client: StmClient;
-    private _eskinDataMaper: EskinDataMaper;
-    private _positionStore: PositionsStore;
-    private _frameReady: boolean;
-    private _lastMsgTime?: number;
+    private _eskinDataHandler: EskinDataHandler;
+    private _servosDataHandler: ServosDataHandler;
 
     private constructor() {
-        this._frameReady = false;
         this._client = StmClient.getInstance();
-        this._eskinDataMaper = new EskinDataMaper();
-        this._positionStore = new PositionsStore();
+        this._eskinDataHandler = new EskinDataHandler();
+        this._servosDataHandler = new ServosDataHandler();
     }
 
     static getInstance() {
@@ -52,28 +47,30 @@ export class StateCommunicator {
         servoReq2.push(calcCKSM(servoReq2));
         servoReq2 = [255, 255].concat(servoReq2);
 
-        this._client.startContinuous(servoReq1, servoReq2, (data) => {
+        let servoReq3 = [servoId1, length, Instruction.Read, Address.PresentLoad, Size.get(Address.PresentLoad)];
+        servoReq3.push(calcCKSM(servoReq3));
+        servoReq3 = [255, 255].concat(servoReq3);
+
+        let servoReq4 = [servoId2, length, Instruction.Read, Address.PresentLoad, Size.get(Address.PresentLoad)];
+        servoReq4.push(calcCKSM(servoReq4));
+        servoReq4 = [255, 255].concat(servoReq4);
+
+        this._client.startContinuous([servoReq1, servoReq2, servoReq3, servoReq4], (data) => {
             const device = data.shift();
             switch (device) {
                 case Device.Servo:
-                    const now = Date.now();
-                    if (this._lastMsgTime) {
-                        console.log(now - this._lastMsgTime);
-                    }
-                    this._lastMsgTime = now;
-                    this._positionStore.handleData(data);
+                    this._servosDataHandler.handleData(data);
                     break;
                 case Device.Eskin:
-                    this._eskinDataMaper.handleData(data);
+                    this._eskinDataHandler.handleData(data);
                     break;
                 default:
                     break;
             }
-            if (this._eskinDataMaper.dataReady()) {
-                const eskinData = this._eskinDataMaper.data;
-                const positions = this._positionStore.data;
-                callback({ ...eskinData, ...positions, timestamp: Date.now() });
-                // callback(this._extractData(data));
+            if (this._eskinDataHandler.dataReady()) {
+                const eskinData = this._eskinDataHandler.data;
+                const servoData = this._servosDataHandler.data;
+                callback({ ...eskinData, ...servoData, timestamp: Date.now() });
             }
         });
     }

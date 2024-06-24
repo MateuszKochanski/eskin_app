@@ -4,14 +4,11 @@ import { ServoCommunicator } from "./communicators/ServoCommunicator";
 import { StateCommunicator } from "./communicators/StateCommunicator/StateCommunicator";
 import { Address } from "./enums/Address";
 import { isCloseTo } from "./utils/isCloseTo";
-import { DataFrame } from "./schemas/DataFrameSchema";
 import { StartReq } from "./schemas/StartReqSchema";
+import { DataFrame } from "DataFrame";
 
 export class Controller {
     private static _instance: Controller;
-    // private _interval: NodeJS.Timeout | undefined;
-    // private _delay = 100;
-    // private _eskinCommunicator: EskinCommunicator;
     private _servoCommunicator: ServoCommunicator;
     private _stateCommunicator: StateCommunicator;
     private _servoId1 = parseInt(process.env.SERVO_1_ID, 10);
@@ -19,16 +16,26 @@ export class Controller {
     private _recordData: boolean = false;
     private _dataRecorder: DataRecorder;
     private _frontCommunicator: FrontCommunicator;
-    private _servo1CurrentPosition: number = -1;
-    private _servo2CurrentPosition: number = -1;
+    private _currentFrame: DataFrame;
+    private _maxTorque: number;
+    private _torqueLimit: number;
 
     private constructor() {
-        // this._eskinCommunicator = EskinCommunicator.getInstance();
         this._servoCommunicator = ServoCommunicator.getInstance();
         this._stateCommunicator = StateCommunicator.getInstance();
         this._dataRecorder = new DataRecorder(process.env.RECORD_DATA_FILENAME);
         this._frontCommunicator = FrontCommunicator.getInstance();
+        this._maxTorque = parseInt(process.env.SERVO_MAX_TORQUE);
+        this._torqueLimit = parseInt(process.env.SERVO_TORQUE_LIMIT);
+        this._initServos();
         this._read();
+    }
+
+    private _initServos() {
+        this._servoCommunicator.setValue(this._servoId1, Address.MaxTorque, this._maxTorque);
+        this._servoCommunicator.setValue(this._servoId2, Address.MaxTorque, this._maxTorque);
+        this._servoCommunicator.setValue(this._servoId1, Address.TorqueLimit, this._torqueLimit);
+        this._servoCommunicator.setValue(this._servoId2, Address.TorqueLimit, this._torqueLimit);
     }
 
     static getInstance() {
@@ -49,8 +56,8 @@ export class Controller {
         return this._setPositions(
             parseInt(process.env.SERVO_1_OPEN_POSITION),
             parseInt(process.env.SERVO_2_OPEN_POSITION),
-            parseInt(process.env.SERVO_1_OPEN_SPEED),
-            parseInt(process.env.SERVO_2_OPEN_SPEED)
+            parseInt(process.env.SERVO_OPEN_SPEED),
+            parseInt(process.env.SERVO_OPEN_SPEED)
         );
     }
 
@@ -58,8 +65,8 @@ export class Controller {
         return this._setPositions(
             parseInt(process.env.SERVO_1_CLOSE_POSITION),
             parseInt(process.env.SERVO_2_CLOSE_POSITION),
-            parseInt(process.env.SERVO_1_CLOSE_SPEED),
-            parseInt(process.env.SERVO_2_CLOSE_SPEED)
+            parseInt(process.env.SERVO_CLOSE_SPEED),
+            parseInt(process.env.SERVO_CLOSE_SPEED)
         );
     }
 
@@ -70,7 +77,13 @@ export class Controller {
         this._servoCommunicator.setValue(this._servoId2, Address.GoalPosition, servo2Pos);
         return new Promise((resolve) => {
             const i = setInterval(() => {
-                if (isCloseTo(servo2Pos, this._servo2CurrentPosition, 3)) {
+                if (!this._currentFrame) return;
+                if (
+                    (isCloseTo(servo1Pos, this._currentFrame.servoPos1, 5) &&
+                        isCloseTo(servo2Pos, this._currentFrame.servoPos2, 5)) ||
+                    isCloseTo(this._torqueLimit, this._currentFrame.servoLoad1, 100) ||
+                    isCloseTo(this._torqueLimit, this._currentFrame.servoLoad2, 100)
+                ) {
                     clearInterval(i);
                     resolve(undefined);
                 }
@@ -89,9 +102,6 @@ export class Controller {
     private _startReading(data: StartReq) {
         this._dataRecorder.init(data!.filename);
         this._recordData = true;
-        // setTimeout(() => {
-        //     this._stopReading();
-        // }, 5000);
     }
 
     private _stopReading() {
@@ -106,8 +116,7 @@ export class Controller {
     }
 
     private _emit(data: DataFrame) {
-        if (data.servoPos1 !== -1) this._servo1CurrentPosition = data.servoPos1;
-        if (data.servoPos2 !== -1) this._servo2CurrentPosition = data.servoPos2;
+        this._currentFrame = data;
 
         this._frontCommunicator.send(data);
         if (this._recordData) this._dataRecorder.add(data);

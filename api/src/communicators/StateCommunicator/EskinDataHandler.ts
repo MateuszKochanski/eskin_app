@@ -12,7 +12,7 @@ type EskinMsg = {
     payload: number[];
 };
 
-export class EskinDataMaper {
+export class EskinDataHandler {
     private _driverMapX: number[][];
     private _leftFingerPatchSetup: EskinPatchSetup;
     private _rightFingerPatchSetup: EskinPatchSetup;
@@ -87,11 +87,6 @@ export class EskinDataMaper {
             this._rightFingerPatch = this._mapPatch(this._rightFingerPatchSetup);
 
             this._dataReady = true;
-            return;
-            console.log("LEFT");
-            this._logPatch(this._leftFingerPatch);
-            console.log("RIGHT");
-            this._logPatch(this._rightFingerPatch);
         }
     }
 

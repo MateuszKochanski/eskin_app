@@ -20,6 +20,8 @@ export default function App() {
     const [servosParameters, setServosParameters] = useState([
         { name: "Servo 1 position:", value: 0 },
         { name: "Servo 2 position:", value: 0 },
+        { name: "Servo 1 load:", value: 0 },
+        { name: "Servo 2 load:", value: 0 },
     ]);
 
     useWebSocket(socketUrl, {
@@ -31,6 +33,8 @@ export default function App() {
             setServosParameters([
                 { name: "Servo 1 position:", value: data.servoPos1 },
                 { name: "Servo 2 position:", value: data.servoPos2 },
+                { name: "Servo 1 load:", value: data.servoLoad1 },
+                { name: "Servo 2 load:", value: data.servoLoad2 },
             ]);
         },
         shouldReconnect: (closeEvent) => true,

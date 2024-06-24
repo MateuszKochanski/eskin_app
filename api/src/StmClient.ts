@@ -30,8 +30,14 @@ export class StmClient {
         return this._instance;
     }
 
-    startContinuous(req1: number[], req2: number[], callback: (data: number[]) => void) {
-        const request = [MessageType.Continuous, ContinuousCommand.Start, req1.length, ...req1, req2.length, ...req2];
+    startContinuous(requests: number[][], callback: (data: number[]) => void) {
+        let msg: number[] = [];
+        for (let request of requests) {
+            msg.push(request.length);
+            msg = [...msg, ...request];
+        }
+
+        const request = [MessageType.Continuous, ContinuousCommand.Start, ...msg];
         this._continuousCallback = callback;
         this._client.send(Buffer.from(request), this._port, this._ip, (err) => {
             if (err) throw err;
