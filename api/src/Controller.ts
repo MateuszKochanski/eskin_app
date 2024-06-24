@@ -1,8 +1,7 @@
 import { DataRecorder } from "./DataRecorder";
 import { FrontCommunicator } from "./FrontCommunicator";
-import { EskinCommunicator } from "./communicators/ESkinCommunicator";
 import { ServoCommunicator } from "./communicators/ServoCommunicator";
-import { StateCommunicator } from "./communicators/StateCommunicator";
+import { StateCommunicator } from "./communicators/StateCommunicator/StateCommunicator";
 import { Address } from "./enums/Address";
 import { isCloseTo } from "./utils/isCloseTo";
 import { DataFrame } from "./schemas/DataFrameSchema";

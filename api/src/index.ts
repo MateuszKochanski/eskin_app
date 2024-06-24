@@ -4,7 +4,8 @@ import { setupServos } from "./utils/setupServos";
 import { HttpServer } from "./HttpServer";
 import { Address } from "./enums/Address";
 import { ServoCommunicator } from "./communicators/ServoCommunicator";
-import { StateCommunicator } from "./communicators/StateCommunicator";
+import { StateCommunicator } from "./communicators/StateCommunicator/StateCommunicator";
+import { StmClient } from "./StmClient";
 
 configDotenv();
 
@@ -28,4 +29,4 @@ new HttpServer();
 
 // setTimeout(() => {
 //     StateCommunicator.getInstance().stop();
-// }, 5000);
+// }, 500000);
