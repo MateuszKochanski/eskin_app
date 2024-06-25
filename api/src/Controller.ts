@@ -5,9 +5,11 @@ import { StateCommunicator } from "./communicators/StateCommunicator/StateCommun
 import { Address } from "./enums/Address";
 import { isCloseTo } from "./utils/isCloseTo";
 import { StartReq } from "./schemas/StartReqSchema";
-import { DataFrame } from "DataFrame";
+import { DataFrame } from "./schemas/DataFrameSchema";
+import { wait } from "./utils/wait";
+import { AbstractController } from "./AbstractController";
 
-export class Controller {
+export class Controller extends AbstractController {
     private static _instance: Controller;
     private _servoCommunicator: ServoCommunicator;
     private _stateCommunicator: StateCommunicator;
@@ -21,6 +23,7 @@ export class Controller {
     private _torqueLimit: number;
 
     private constructor() {
+        super();
         this._servoCommunicator = ServoCommunicator.getInstance();
         this._stateCommunicator = StateCommunicator.getInstance();
         this._dataRecorder = new DataRecorder(process.env.RECORD_DATA_FILENAME);
@@ -47,7 +50,7 @@ export class Controller {
         await this._openPosition();
         this._startReading(data);
         await this._closePosition();
-        await this._wait(1000);
+        await wait(1000);
         this._stopReading();
         await this._openPosition();
     }
@@ -76,26 +79,21 @@ export class Controller {
         this._servoCommunicator.setValue(this._servoId1, Address.GoalPosition, servo1Pos);
         this._servoCommunicator.setValue(this._servoId2, Address.GoalPosition, servo2Pos);
         return new Promise((resolve) => {
+            const t = setTimeout(() => {
+                clearInterval(i);
+                resolve(undefined);
+            }, 5000);
             const i = setInterval(() => {
                 if (!this._currentFrame) return;
                 if (
-                    (isCloseTo(servo1Pos, this._currentFrame.servoPos1, 5) &&
-                        isCloseTo(servo2Pos, this._currentFrame.servoPos2, 5)) ||
-                    isCloseTo(this._torqueLimit, this._currentFrame.servoLoad1, 100) ||
-                    isCloseTo(this._torqueLimit, this._currentFrame.servoLoad2, 100)
+                    isCloseTo(servo1Pos, this._currentFrame.servoPos1, 5) &&
+                    isCloseTo(servo2Pos, this._currentFrame.servoPos2, 5)
                 ) {
+                    clearTimeout(t);
                     clearInterval(i);
                     resolve(undefined);
                 }
             }, 100);
-        });
-    }
-
-    private async _wait(ms: number) {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(undefined);
-            }, ms);
         });
     }
 

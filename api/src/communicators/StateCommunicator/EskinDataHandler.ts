@@ -28,7 +28,7 @@ export class EskinDataHandler {
 
     get data(): { eskin1: number[][]; eskin2: number[][] } {
         this._dataReady = false;
-        return { eskin1: this._leftFingerPatch, eskin2: this._rightFingerPatch };
+        return { eskin1: this._rightFingerPatch, eskin2: this._leftFingerPatch };
     }
 
     dataReady() {

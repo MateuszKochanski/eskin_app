@@ -11,8 +11,6 @@ export class StmClient {
     private _instantCallbacks: Map<number, (data: number[]) => void>;
     private _continuousSet: boolean = false;
     private _continuousCallback?: (data: number[]) => void;
-    private _lastMsgTime?: number;
-
     private _ip = process.env.STM_SERVER_IP;
     private _port = parseInt(process.env.STM_SERVER_PORT);
 
@@ -70,9 +68,6 @@ export class StmClient {
 
     private _handleResponse = (data: Buffer) => {
         const dataArray = Array.from(data);
-
-        // console.log(dataArray);
-        // console.log(this._instantCallbacks.size);
         const type = dataArray.shift();
         switch (type) {
             case MessageType.Instant:

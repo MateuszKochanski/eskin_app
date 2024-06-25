@@ -6,7 +6,7 @@ import { StmClient } from "../../StmClient";
 import { EskinDataHandler } from "./EskinDataHandler";
 import { ServosDataHandler } from "./ServosDataHandler";
 import { Device } from "../../enums/Device";
-import { DataFrame } from "DataFrame";
+import { DataFrame } from "../../schemas/DataFrameSchema";
 
 export class StateCommunicator {
     private static _instance: StateCommunicator;

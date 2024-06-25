@@ -1,4 +1,4 @@
-import { DataFrame } from "DataFrame";
+import { DataFrame } from "./schemas/DataFrameSchema";
 import { WebSocketServer } from "ws";
 
 const wss = new WebSocketServer({

@@ -2,14 +2,20 @@ import express from "express";
 import cors from "cors";
 import { StartReqSchema } from "./schemas/StartReqSchema";
 import { Controller } from "./Controller";
+import { AbstractController } from "./AbstractController";
+import { PlaybackController } from "./PlaybackController";
 
 export class HttpServer {
     private _app;
     private _port = 3002;
-    private _controller: Controller;
+    private _controller: AbstractController;
 
     constructor() {
-        this._controller = Controller.getInstance();
+        if (process.env.PLAYBACK_MODE === "true") {
+            this._controller = PlaybackController.getInstance();
+        } else {
+            this._controller = Controller.getInstance();
+        }
 
         this._app = express();
         this._app.use(cors());

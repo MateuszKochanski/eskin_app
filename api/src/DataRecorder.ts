@@ -1,5 +1,5 @@
-import { DataFrame } from "DataFrame";
 import fs from "fs";
+import { DataFrame } from "./schemas/DataFrameSchema";
 
 export class DataRecorder {
     private _filename: string;
