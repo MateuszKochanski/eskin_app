@@ -7,7 +7,7 @@ export function Measurement() {
     };
 
     const start = () => {
-        fetch("http://localhost:3002/start", {
+        fetch(`http://localhost:3002/start`, {
             method: "POST",
             headers: {
                 Accept: "application/json",

@@ -6,7 +6,7 @@ import { ServoPositionsPrev } from "./servoPositionsPrev/ServoPositionsPrev";
 import { Measurement } from "./measurement/Measurement";
 
 export default function App() {
-    const socketUrl = "ws://localhost:3001/";
+    const socketUrl = `ws://localhost:3001/`;
     const [eskin1, setEskin1] = useState([[]]);
     const [eskin2, setEskin2] = useState([[]]);
 

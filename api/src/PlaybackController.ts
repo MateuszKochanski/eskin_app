@@ -9,9 +9,13 @@ export class PlaybackController extends AbstractController {
     private static _instance: PlaybackController;
     private _filename: string;
     private _frontCommunicator: FrontCommunicator;
+    private _abort: boolean;
+    private _running: boolean;
 
     private constructor() {
         super();
+        this._abort = false;
+        this._running = false;
         this._frontCommunicator = FrontCommunicator.getInstance();
     }
 
@@ -31,23 +35,40 @@ export class PlaybackController extends AbstractController {
             try {
                 const jsonData = JSON.parse(data);
                 const dataFrames = DataFrameArraySchema.parse(jsonData);
-                this._start(dataFrames);
+
+                if (!this._running) {
+                    this._run(dataFrames);
+                    return;
+                }
+
+                this._abort = true;
+                let i = setInterval(() => {
+                    if (!this._running) {
+                        clearInterval(i);
+                        this._run(dataFrames);
+                    }
+                }, 100);
             } catch (err) {
                 console.error("Error parsing JSON:", err);
             }
         });
     }
 
-    async _start(frames: DataFrame[]) {
+    async _run(frames: DataFrame[]) {
+        this._running = true;
         let lastTimestamp;
         for (let frame of frames) {
             if (lastTimestamp) {
                 await wait(frame.timestamp - lastTimestamp);
+                if (this._abort) {
+                    this._running = false;
+                    this._abort = false;
+                    return;
+                }
             }
             this._frontCommunicator.send(frame);
             lastTimestamp = frame.timestamp;
         }
+        this._running = false;
     }
-
-    private _publish() {}
 }
